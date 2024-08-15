@@ -173,13 +173,36 @@ class Human4DConfig(FullConfig):
 cs = ConfigStore.instance()
 cs.store(name="config", node=Human4DConfig)
 
+
 @hydra.main(version_base="1.2", config_name="config")
 def main(cfg: DictConfig) -> Optional[float]:
     """Main function for running the PHALP tracker."""
+    os.makedirs(os.path.join(CACHE_DIR, "phalp"), exist_ok=True)
+    os.makedirs(os.path.join(CACHE_DIR, "phalp/3D/models/smpl"), exist_ok=True)
+    os.makedirs(os.path.join(CACHE_DIR, "phalp/weights"), exist_ok=True)
+    os.makedirs(os.path.join(CACHE_DIR, "phalp/ava"), exist_ok=True)
+    # Define the cache directory
 
+    # Define the source location of your pkl file in the data folder
+    SOURCE_PKL_FILE = os.path.join("data", "basicModel_neutral_lbs_10_207_0_v1.0.0.pkl")
+
+    # Define the target location within the CACHE_DIR
+    TARGET_DIR = os.path.join(CACHE_DIR, "phalp/3D/models/smpl")
+    TARGET_PKL_FILE = os.path.join(TARGET_DIR, "SMPL_NEUTRAL.pkl")
+
+    # Create necessary directories
+    os.makedirs(TARGET_DIR, exist_ok=True)
+
+    # Check if the SMPL_NEUTRAL.pkl file is already present
+    if not os.path.exists(TARGET_PKL_FILE):
+        # Copy the basicModel_neutral_lbs_10_207_0_v1.0.0.pkl file to the target directory and rename it
+        shutil.copy(SOURCE_PKL_FILE, TARGET_PKL_FILE)
+        print(f"Copied {SOURCE_PKL_FILE} to {TARGET_PKL_FILE}")
+    else:
+        print(f"File {TARGET_PKL_FILE} already exists")
     phalp_tracker = HMR2_4dhuman(cfg)
-
     phalp_tracker.track()
 
 if __name__ == "__main__":
     main()
+
